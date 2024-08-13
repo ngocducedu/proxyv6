@@ -7,7 +7,7 @@ output_file="/home/xpx/vivucloud/boot_ifconfig.sh"
 output_file_ipv6="/home/xpx/vivucloud/ipv6.txt"
 
 # Đường dẫn để lưu file 3proxy.cfg
-output_file_3proxycfg="/root/3proxy/3proxy.cfg"
+output_file_3proxycfg="/etc/3proxy/3proxy.cfg"
 
 # Xóa file cũ nếu đã tồn tại
 rm -f "$output_file"
