@@ -26,7 +26,7 @@ generate_random_suffix() {
 # Tạo 500 địa chỉ IPv6 ngẫu nhiên và lưu vào file boot_ipconfig.sh
 for i in $(seq 1 500); do
     random_suffix=$(generate_random_suffix)
-    echo "ifconfig ens33 inet6 add $prefix:$random_suffix/64" >> "$output_file"
+    echo "ifconfig ens33 inet6 add :$random_suffix/64" >> "$output_file"
 done
 
 # Đặt quyền thực thi cho file boot_ipconfig.sh
