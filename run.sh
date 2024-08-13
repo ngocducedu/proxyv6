@@ -30,7 +30,7 @@ generate_random_suffix() {
 }
 
 # Ghi các cấu hình cố định vào file 3proxy.cfg
-cat <<EOT >> "$output_file_3proxy"
+cat <<EOT >> "$output_file_3proxycfg"
 daemon
 maxconn 3000
 nserver 1.1.1.1
