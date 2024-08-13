@@ -15,8 +15,8 @@ if [ -z "$ipv6_address" ]; then
     exit 1
 fi
 
-# Lấy phần prefix của địa chỉ IPv6
-prefix=$(echo "$ipv6_address" | cut -d':' -f1-4)
+# Lấy phần prefix của địa chỉ IPv6, chỉ lấy 4 nhóm đầu tiên
+prefix=$(echo "$ipv6_address" | awk -F':' '{print $1 ":" $2 ":" $3 ":" $4}')
 
 # Hàm tạo suffix ngẫu nhiên
 generate_random_suffix() {
@@ -26,7 +26,7 @@ generate_random_suffix() {
 # Tạo 500 địa chỉ IPv6 ngẫu nhiên và lưu vào file boot_ipconfig.sh
 for i in $(seq 1 500); do
     random_suffix=$(generate_random_suffix)
-    echo "ifconfig ens33 inet6 add $prefix:/64" >> "$output_file"
+    echo "ifconfig ens33 inet6 add $prefix:$random_suffix/64" >> "$output_file"
 done
 
 # Đặt quyền thực thi cho file boot_ipconfig.sh
