@@ -10,7 +10,7 @@ output_file_ipv6="/home/xpx/vivucloud/ipv6.txt"
 output_file_3proxycfg="/etc/3proxy/3proxy.cfg"
 
 # Xóa file cũ nếu đã tồn tại
-rm -f "$output_file"
+rm -f "$output_file" "$output_file_ipv6" "$output_file_3proxycfg"
 
 # Lấy địa chỉ IPv6 của máy, chỉ lấy dòng đầu tiên
 ipv6_address=$(ip -6 addr show ens33 | grep -m 1 -oP '(?<=inet6\s)[a-f0-9:]+(?=/64)')
