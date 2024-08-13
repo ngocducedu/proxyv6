@@ -1,100 +1,35 @@
-#!/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-random() {
-	tr </dev/urandom -dc A-Za-z0-9 | head -c5
-	echo
+#!/bin/bash
+
+# Đường dẫn để lưu file boot_ipconfig.sh
+output_file="/home/xpx/vivucloud/boot_ipconfig.sh"
+
+# Xóa file cũ nếu đã tồn tại
+rm -f "$output_file"
+
+# Lấy địa chỉ IPv6 của máy
+ipv6_address=$(ip -6 addr show ens33 | grep -oP '(?<=inet6\s)[a-f0-9:]+(?=/64)')
+
+# Kiểm tra xem địa chỉ IPv6 có được lấy thành công không
+if [ -z "$ipv6_address" ]; then
+    echo "Không thể lấy địa chỉ IPv6. Vui lòng kiểm tra kết nối mạng."
+    exit 1
+fi
+
+# Lấy phần prefix của địa chỉ IPv6
+prefix=$(echo "$ipv6_address" | cut -d':' -f1-4)
+
+# Hàm tạo suffix ngẫu nhiên
+generate_random_suffix() {
+    printf "%04x:%04x:%04x:%04x" $((RANDOM%65536)) $((RANDOM%65536)) $((RANDOM%65536)) $((RANDOM%65536))
 }
-array=(1 2 3 4 5 6 7 8 9 0 a b c d e f)
-gen64() {
-	ip64() {
-		echo "${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}"
-	}
-	echo "$1:$(ip64):$(ip64):$(ip64):$(ip64)"
-}
-install_3proxy() {
-    echo "installing 3proxy"
-    URL="https://github.com/z3APA3A/3proxy/archive/3proxy-0.8.6.tar.gz"
-    wget -qO- $URL | bsdtar -xvf-
-    cd 3proxy-3proxy-0.8.6
-    make -f Makefile.Linux
-    mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
-    cp src/3proxy /usr/local/etc/3proxy/bin/
-    #cp ./scripts/rc.d/proxy.sh /etc/init.d/3proxy
-    #chmod +x /etc/init.d/3proxy
-    #chkconfig 3proxy on
-    cd $WORKDIR
-}
-download_proxy() {
-cd /home/vpsus
-curl -F "file=@proxy.txt" https://file.io
-}
-gen_3proxy() {
-    cat <<EOF
-daemon
-maxconn 2000
-nserver 1.1.1.1
-nserver 8.8.4.4
-nserver 2001:4860:4860::8888
-nserver 2001:4860:4860::8844
-nscache 65536
-timeouts 1 5 30 60 180 1800 15 60
-setgid 65535
-setuid 65535
-stacksize 6291456
-flush
-auth strong
-users $(awk -F "/" 'BEGIN{ORS="";} {print $1 ":CL:" $2 " "}' ${WORKDATA})
-$(awk -F "/" '{print "auth strong\n" \
-"allow " $1 "\n" \
-"proxy -6 -n -a -p" $4 " -i" $3 " -e"$5"\n" \
-"flush\n"}' ${WORKDATA})
-EOF
-}
-gen_proxy_file_for_user() {
-    cat >proxy.txt <<EOF
-$(awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2 }' ${WORKDATA})
-EOF
-}
-gen_data() {
-    seq $FIRST_PORT $LAST_PORT | while read port; do
-        echo "user$port/$(random)/$IP4/$port/$(gen64 $IP6)"
-    done
-}
-gen_iptables() {
-    cat <<EOF
-    $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA})
-EOF
-}
-gen_ifconfig() {
-    cat <<EOF
-$(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/48"}' ${WORKDATA})
-EOF
-}
-echo "installing apps"
-yum -y install gcc net-tools bsdtar zip >/dev/null
-install_3proxy
-echo "working folder = /home/vpsus"
-WORKDIR="/home/vpsus"
-WORKDATA="${WORKDIR}/data.txt"
-mkdir $WORKDIR && cd $_
-IP4=$(curl -4 -s icanhazip.com)
-IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
-echo "Internal ip = ${IP4}. Exteranl sub for ip6 = ${IP6}"
-FIRST_PORT=10000
-LAST_PORT=12000
-gen_data >$WORKDIR/data.txt
-gen_iptables >$WORKDIR/boot_iptables.sh
-gen_ifconfig >$WORKDIR/boot_ifconfig.sh
-chmod +x boot_*.sh /etc/rc.local
-gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
-cat >>/etc/rc.local <<EOF
-bash ${WORKDIR}/boot_iptables.sh
-bash ${WORKDIR}/boot_ifconfig.sh
-ulimit -n 1000048
-/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
-EOF
-chmod 0755 /etc/rc.local
-bash /etc/rc.local
-gen_proxy_file_for_user
-echo "Starting Proxy"
-download_proxy
+
+# Tạo 500 địa chỉ IPv6 ngẫu nhiên và lưu vào file boot_ipconfig.sh
+for i in $(seq 1 500); do
+    random_suffix=$(generate_random_suffix)
+    echo "ifconfig ens33 inet6 add $prefix:$random_suffix/64" >> "$output_file"
+done
+
+# Đặt quyền thực thi cho file boot_ipconfig.sh
+chmod +x "$output_file"
+
+echo "Script đã tạo thành công 500 địa chỉ IPv6 và lưu vào $output_file"
