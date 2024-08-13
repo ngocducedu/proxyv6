@@ -16,7 +16,7 @@ if [ -z "$ipv6_address" ]; then
 fi
 
 # Lấy phần prefix của địa chỉ IPv6, chỉ lấy 4 nhóm đầu tiên
-prefix=$(echo "$ipv6_address" | awk -F':' '{print $1 ":" $2 ":" $3 ":" $4}')
+prefix=$(echo "$ipv6_address" | awk -F':' '{for(i=1;i<=4;i++) printf "%s%s", $i, (i<4?":":"")}')
 
 # Hàm tạo suffix ngẫu nhiên
 generate_random_suffix() {
