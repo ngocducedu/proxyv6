@@ -54,7 +54,7 @@ for i in $(seq 1 500); do
 
     # Tạo dòng cấu hình proxy và lưu vào 3proxy.cfg
     port=$((14000 + i))
-    echo "proxy -6 -n -a -p$port -i192.168.1.151 -e$prefix$random_suffix" >> "$output_file_3proxy"
+    echo "proxy -6 -n -a -p$port -i192.168.1.151 -e$prefix$random_suffix" >> "$output_file_3proxycfg"
 done
 
 
