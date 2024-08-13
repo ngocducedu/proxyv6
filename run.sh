@@ -6,8 +6,8 @@ output_file="/home/xpx/vivucloud/boot_ipconfig.sh"
 # Xóa file cũ nếu đã tồn tại
 rm -f "$output_file"
 
-# Lấy địa chỉ IPv6 của máy
-ipv6_address=$(ip -6 addr show ens33 | grep -oP '(?<=inet6\s)[a-f0-9:]+(?=/64)')
+# Lấy địa chỉ IPv6 của máy, chỉ lấy dòng đầu tiên
+ipv6_address=$(ip -6 addr show ens33 | grep -m 1 -oP '(?<=inet6\s)[a-f0-9:]+(?=/64)')
 
 # Kiểm tra xem địa chỉ IPv6 có được lấy thành công không
 if [ -z "$ipv6_address" ]; then
